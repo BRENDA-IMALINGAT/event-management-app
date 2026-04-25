@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}Registration Confirmed – EventMgr{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5 text-center">
+    <div class="card shadow-sm border-success">
+      <div class="card-header bg-success text-white">
+        <h4 class="mb-0"><i class="bi bi-check-circle me-2"></i>You're Registered!</h4>
+      </div>
+      <div class="card-body p-4">
+        <p class="fs-5 mb-3">
+          Thank you, <strong>{{ attendee.name }}</strong>!<br />
+          Your spot has been confirmed.
+        </p>
+
+        <table class="table table-bordered text-start">
+          <tbody>
+            <tr>
+              <th scope="row"><i class="bi bi-person me-1"></i> Name</th>
+              <td>{{ attendee.name }}</td>
+            </tr>
+            <tr>
+              <th scope="row"><i class="bi bi-envelope me-1"></i> Email</th>
+              <td>{{ attendee.email }}</td>
+            </tr>
+            <tr>
+              <th scope="row"><i class="bi bi-telephone me-1"></i> Phone</th>
+              <td>{{ attendee.phone }}</td>
+            </tr>
+            <tr>
+              <th scope="row"><i class="bi bi-egg-fried me-1"></i> Food</th>
+              <td>{{ attendee.food_choice }}</td>
+            </tr>
+            <tr>
+              <th scope="row"><i class="bi bi-tag me-1"></i> Unit Cost</th>
+              <td>{{ "{:,}".format(unit_cost) }} UGX</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <a href="{{ url_for('register') }}" class="btn btn-outline-primary mt-2">
+          <i class="bi bi-plus-circle me-1"></i> Register Another Attendee
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
