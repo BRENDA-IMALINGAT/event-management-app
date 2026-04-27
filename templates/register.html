@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block title %}Register – EventMgr{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5">
+    <div class="card shadow-sm">
+      <div class="card-header bg-primary text-white text-center">
+        <h4 class="mb-0"><i class="bi bi-person-plus me-2"></i>Attendee Registration</h4>
+      </div>
+      <div class="card-body p-4">
+        <form method="POST" action="{{ url_for('register') }}" novalidate>
+          <div class="mb-3">
+            <label for="name" class="form-label fw-semibold">Full Name</label>
+            <input
+              type="text"
+              class="form-control"
+              id="name"
+              name="name"
+              placeholder="e.g. Jane Akello"
+              required
+            />
+          </div>
+
+          <div class="mb-3">
+            <label for="email" class="form-label fw-semibold">Email Address</label>
+            <input
+              type="email"
+              class="form-control"
+              id="email"
+              name="email"
+              placeholder="e.g. jane@example.com"
+              required
+            />
+          </div>
+
+          <div class="mb-3">
+            <label for="phone" class="form-label fw-semibold">Phone Number</label>
+            <input
+              type="tel"
+              class="form-control"
+              id="phone"
+              name="phone"
+              placeholder="e.g. +256 700 123456"
+              required
+            />
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Food Choice</label>
+            <div class="row g-2">
+              {% for food, price in food_options.items() %}
+              <div class="col-6">
+                <input
+                  type="radio"
+                  class="btn-check"
+                  name="food"
+                  id="food_{{ loop.index }}"
+                  value="{{ food }}"
+                  required
+                />
+                <label
+                  class="btn btn-outline-success w-100 text-start food-label"
+                  for="food_{{ loop.index }}"
+                >
+                  <strong>{{ food }}</strong>
+                  <br />
+                  <small class="text-muted">{{ "{:,}".format(price) }} UGX</small>
+                </label>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="d-grid">
+            <button type="submit" class="btn btn-primary btn-lg">
+              <i class="bi bi-check-circle me-1"></i> Register &amp; Pick Food
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

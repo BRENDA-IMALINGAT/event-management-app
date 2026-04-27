@@ -1,0 +1,56 @@
+/* =========================================================
+   EventMgr – Custom Styles
+   ========================================================= */
+
+body {
+  background-color: #f8f9fa;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Navbar brand icon color fix */
+.navbar-brand i {
+  color: #ffc107;
+}
+
+/* Food choice radio buttons */
+.food-label {
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-check:checked + .food-label {
+  background-color: #198754;
+  color: #fff;
+  border-color: #198754;
+}
+
+.btn-check:checked + .food-label .text-muted {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Card hover lift */
+.card {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Stat display numbers */
+.display-6 {
+  font-size: 2rem;
+}
+
+/* Table footer styling */
+tfoot th {
+  font-size: 0.95rem;
+}
+
+/* Footer */
+footer {
+  font-size: 0.85rem;
+}
