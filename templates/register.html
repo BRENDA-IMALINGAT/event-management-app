@@ -11,6 +11,17 @@
       <div class="card-body p-4">
         <form method="POST" action="{{ url_for('register') }}" novalidate>
           <div class="mb-3">
+            <label for="event_id" class="form-label fw-semibold">Event</label>
+            <select class="form-select" id="event_id" name="event_id" required>
+              {% for ev in events %}
+              <option value="{{ ev.id }}" {% if selected_event and ev.id == selected_event.id %}selected{% endif %}>
+                {{ ev.name }} {% if ev.ticket_price %}(Ticket: {{ "{:,}".format(ev.ticket_price|int) }} UGX){% else %}(Free){% endif %}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="mb-3">
             <label for="name" class="form-label fw-semibold">Full Name</label>
             <input
               type="text"
@@ -74,7 +85,7 @@
 
           <div class="d-grid">
             <button type="submit" class="btn btn-primary btn-lg">
-              <i class="bi bi-check-circle me-1"></i> Register &amp; Pick Food
+              <i class="bi bi-check-circle me-1"></i> Register Ticket
             </button>
           </div>
         </form>

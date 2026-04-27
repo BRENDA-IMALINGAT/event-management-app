@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Ticket Payment – EventMgr{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5">
+    <div class="card shadow-sm">
+      <div class="card-header bg-warning">
+        <h4 class="mb-0"><i class="bi bi-credit-card me-2"></i>Ticket Payment</h4>
+      </div>
+      <div class="card-body">
+        <p class="mb-1"><strong>Attendee:</strong> {{ attendee.name }}</p>
+        <p class="mb-1"><strong>Event:</strong> {{ attendee.event.name }}</p>
+        <p class="mb-3"><strong>Amount:</strong> {{ "{:,}".format(payment.amount|int) }} UGX</p>
+
+        {% if payment.status == 'paid' %}
+        <div class="alert alert-success mb-3">This ticket is already paid.</div>
+        {% else %}
+        <form method="POST" action="{{ url_for('payment', attendee_id=attendee.id) }}">
+          <div class="mb-3">
+            <label class="form-label">Payment Method</label>
+            <select class="form-select" name="provider">
+              <option value="mobile_money">Mobile Money</option>
+              <option value="card">Card</option>
+              <option value="bank_transfer">Bank Transfer</option>
+              <option value="cash">Cash</option>
+            </select>
+          </div>
+          <div class="d-grid">
+            <button type="submit" class="btn btn-warning">
+              <i class="bi bi-check2-circle me-1"></i> Complete Payment
+            </button>
+          </div>
+        </form>
+        {% endif %}
+
+        <div class="mt-3">
+          <a href="{{ url_for('confirmation', attendee_id=attendee.id) }}" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left me-1"></i> Back to Ticket
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

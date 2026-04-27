@@ -34,6 +34,11 @@
           </li>
           {% if session.get('organizer') %}
           <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('events') }}">
+              <i class="bi bi-calendar2-plus me-1"></i>Events
+            </a>
+          </li>
+          <li class="nav-item">
             <a class="nav-link" href="{{ url_for('dashboard') }}">
               <i class="bi bi-speedometer2 me-1"></i>Dashboard
             </a>
@@ -41,6 +46,11 @@
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('budget') }}">
               <i class="bi bi-cash-stack me-1"></i>Budget
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('analytics') }}">
+              <i class="bi bi-graph-up me-1"></i>Analytics
             </a>
           </li>
           <li class="nav-item">
@@ -52,6 +62,11 @@
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('login') }}">
               <i class="bi bi-shield-lock me-1"></i>Organizer Login
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('signup') }}">
+              <i class="bi bi-person-badge me-1"></i>Organizer Signup
             </a>
           </li>
           {% endif %}

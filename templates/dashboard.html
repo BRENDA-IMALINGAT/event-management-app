@@ -4,9 +4,12 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
   <h2 class="mb-0"><i class="bi bi-speedometer2 me-2 text-primary"></i>Organizer Dashboard</h2>
-  <a href="{{ url_for('budget') }}" class="btn btn-success">
-    <i class="bi bi-cash-stack me-1"></i> View Full Budget
-  </a>
+  <div>
+    <span class="badge bg-primary me-2">Event: {{ event.name }}</span>
+    <a href="{{ url_for('budget') }}" class="btn btn-success">
+      <i class="bi bi-cash-stack me-1"></i> View Full Budget
+    </a>
+  </div>
 </div>
 
 <!-- Stats cards -->
@@ -32,6 +35,25 @@
       <div class="card-body">
         <div class="display-6 fw-bold text-warning">{{ "{:,}".format(food_total|int) }}</div>
         <div class="text-muted">Food Budget (UGX)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-6">
+    <div class="card border-info shadow-sm">
+      <div class="card-body">
+        <h6 class="mb-1"><i class="bi bi-currency-dollar me-1"></i>Ticket Payments</h6>
+        <div class="text-muted small">{{ paid_count }} / {{ attendees|length }} attendees paid</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card border-secondary shadow-sm">
+      <div class="card-body">
+        <h6 class="mb-1"><i class="bi bi-qr-code-scan me-1"></i>Check-ins</h6>
+        <div class="text-muted small">{{ checked_in_count }} / {{ attendees|length }} checked in</div>
       </div>
     </div>
   </div>
@@ -96,6 +118,8 @@
                 <th>Email</th>
                 <th>Phone</th>
                 <th>Food Choice</th>
+                <th>Payment</th>
+                <th>Check-in</th>
               </tr>
             </thead>
             <tbody>
@@ -108,6 +132,20 @@
                 <td>
                   <span class="badge bg-success">{{ a.food_choice }}</span>
                 </td>
+                <td>
+                  {% if a.paid %}
+                  <span class="badge bg-success">Paid</span>
+                  {% else %}
+                  <a href="{{ url_for('payment', attendee_id=a.id) }}" class="btn btn-sm btn-outline-warning">Pending</a>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if a.checked_in %}
+                  <span class="badge bg-primary">Checked In</span>
+                  {% else %}
+                  <span class="badge bg-secondary">Not yet</span>
+                  {% endif %}
+                </td>
               </tr>
               {% endfor %}
             </tbody>
@@ -118,6 +156,29 @@
         {% endif %}
       </div>
     </div>
+  </div>
+</div>
+
+<div class="card shadow-sm mt-4">
+  <div class="card-header bg-info text-white">
+    <h5 class="mb-0"><i class="bi bi-bell me-2"></i>Send Notification</h5>
+  </div>
+  <div class="card-body">
+    <form method="POST" action="{{ url_for('notifications_send') }}" class="row g-2">
+      <div class="col-md-2">
+        <select class="form-select" name="channel">
+          <option value="email">Email</option>
+          <option value="sms">SMS</option>
+          <option value="whatsapp">WhatsApp</option>
+        </select>
+      </div>
+      <div class="col-md-8">
+        <input type="text" class="form-control" name="message" placeholder="e.g. Event starts in 2 hours. Please bring your ticket." required />
+      </div>
+      <div class="col-md-2 d-grid">
+        <button type="submit" class="btn btn-info text-white"><i class="bi bi-send me-1"></i>Send</button>
+      </div>
+    </form>
   </div>
 </div>
 {% endblock %}
