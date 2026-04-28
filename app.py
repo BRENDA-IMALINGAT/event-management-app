@@ -3,7 +3,7 @@ from flask import (
     session, flash
 )
 from werkzeug.security import check_password_hash, generate_password_hash
-from models import db, Attendee, BudgetItem, FOOD_OPTIONS
+from models import db, Attendee, BudgetItem, Sponsor, SponsorEngagement, FOOD_OPTIONS
 
 # Simple organizer credentials (hashed password for "admin123")
 ORGANIZER_USERNAME = 'organizer'
@@ -199,6 +199,169 @@ def create_app(test_config=None):
         db.session.commit()
         flash(f'"{item.name}" removed from the budget.', 'info')
         return redirect(url_for('budget'))
+
+    @application.route('/sponsors', methods=['GET', 'POST'])
+    def sponsors():
+        auth = _require_organizer()
+        if auth:
+            return auth
+
+        if request.method == 'POST':
+            name = request.form.get('name', '').strip()
+            booth_name = request.form.get('booth_name', '').strip() or None
+            active = request.form.get('active') == 'on'
+
+            if not name:
+                flash('Sponsor name is required.', 'danger')
+                return redirect(url_for('sponsors'))
+
+            sponsor = Sponsor(name=name, booth_name=booth_name, active=active)
+            db.session.add(sponsor)
+            db.session.commit()
+            flash(f'Sponsor "{name}" created.', 'success')
+            return redirect(url_for('sponsors'))
+
+        sponsors_list = Sponsor.query.order_by(Sponsor.name.asc()).all()
+        return render_template('sponsors.html', sponsors=sponsors_list)
+
+    @application.route('/sponsors/delete/<int:sponsor_id>', methods=['POST'])
+    def sponsors_delete(sponsor_id):
+        auth = _require_organizer()
+        if auth:
+            return auth
+
+        sponsor = db.get_or_404(Sponsor, sponsor_id)
+        db.session.delete(sponsor)
+        db.session.commit()
+        flash(f'Sponsor "{sponsor.name}" deleted.', 'info')
+        return redirect(url_for('sponsors'))
+
+    @application.route('/sponsors/<int:sponsor_id>/booth-engagement', methods=['POST'])
+    def sponsor_booth_engagement(sponsor_id):
+        auth = _require_organizer()
+        if auth:
+            return auth
+
+        sponsor = db.get_or_404(Sponsor, sponsor_id)
+        attendee_email = request.form.get('attendee_email', '').strip().lower()
+        if not attendee_email:
+            flash('Attendee email is required to log booth engagement.', 'danger')
+            return redirect(url_for('sponsors'))
+
+        attendee = Attendee.query.filter_by(email=attendee_email).first()
+        if not attendee:
+            flash('Attendee email not found. Register attendee first.', 'danger')
+            return redirect(url_for('sponsors'))
+
+        engagement = SponsorEngagement(
+            sponsor_id=sponsor.id,
+            attendee_id=attendee.id,
+            interaction_type='booth_visit',
+            source='organizer_dashboard',
+        )
+        db.session.add(engagement)
+        db.session.commit()
+        flash(f'Booth engagement logged for {sponsor.name}.', 'success')
+        return redirect(url_for('sponsors'))
+
+    @application.route('/sponsor/scan/<qr_token>', methods=['GET', 'POST'])
+    def sponsor_scan(qr_token):
+        sponsor = Sponsor.query.filter_by(qr_token=qr_token, active=True).first_or_404()
+        attendee = None
+
+        attendee_email = request.args.get('email', '').strip().lower()
+        if request.method == 'POST':
+            attendee_email = request.form.get('attendee_email', '').strip().lower()
+        if attendee_email:
+            attendee = Attendee.query.filter_by(email=attendee_email).first()
+
+        engagement = SponsorEngagement(
+            sponsor_id=sponsor.id,
+            attendee_id=attendee.id if attendee else None,
+            interaction_type='qr_scan',
+            source='public_qr',
+        )
+        db.session.add(engagement)
+        db.session.commit()
+
+        if attendee_email and not attendee:
+            flash('Scan recorded, but attendee email was not found.', 'warning')
+        else:
+            flash('Thanks for engaging with this sponsor.', 'success')
+
+        return render_template('sponsor_scan.html', sponsor=sponsor, attendee=attendee)
+
+    @application.route('/analytics')
+    def analytics():
+        auth = _require_organizer()
+        if auth:
+            return auth
+
+        attendees = Attendee.query.all()
+        sponsors_list = Sponsor.query.order_by(Sponsor.name.asc()).all()
+        engagements = SponsorEngagement.query.all()
+
+        total_attendees = len(attendees)
+        food_summary = {}
+        for attendee in attendees:
+            choice = attendee.food_choice
+            food_summary[choice] = food_summary.get(choice, 0) + 1
+
+        sponsor_rows = {}
+        all_unique_attendees = set()
+        total_qr_scans = 0
+        total_booth_visits = 0
+
+        for sponsor in sponsors_list:
+            sponsor_rows[sponsor.id] = {
+                'sponsor': sponsor,
+                'qr_scans': 0,
+                'booth_visits': 0,
+                'total_engagements': 0,
+                'unique_attendees': set(),
+                'scan_url': url_for('sponsor_scan', qr_token=sponsor.qr_token, _external=True),
+            }
+
+        for engagement in engagements:
+            row = sponsor_rows.get(engagement.sponsor_id)
+            if not row:
+                continue
+
+            row['total_engagements'] += 1
+            if engagement.interaction_type == 'booth_visit':
+                row['booth_visits'] += 1
+                total_booth_visits += 1
+            else:
+                row['qr_scans'] += 1
+                total_qr_scans += 1
+
+            if engagement.attendee_id:
+                row['unique_attendees'].add(engagement.attendee_id)
+                all_unique_attendees.add(engagement.attendee_id)
+
+        sponsor_metrics = []
+        for sponsor in sponsors_list:
+            row = sponsor_rows[sponsor.id]
+            sponsor_metrics.append({
+                'sponsor': sponsor,
+                'qr_scans': row['qr_scans'],
+                'booth_visits': row['booth_visits'],
+                'total_engagements': row['total_engagements'],
+                'unique_attendees': len(row['unique_attendees']),
+                'scan_url': row['scan_url'],
+            })
+
+        return render_template(
+            'analytics.html',
+            total_attendees=total_attendees,
+            food_summary=food_summary,
+            sponsors=sponsors_list,
+            total_sponsors=len(sponsors_list),
+            total_qr_scans=total_qr_scans,
+            total_booth_visits=total_booth_visits,
+            total_unique_attendees=len(all_unique_attendees),
+            sponsor_metrics=sponsor_metrics,
+        )
 
     return application
 

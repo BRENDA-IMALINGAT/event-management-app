@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block title %}Sponsors – EventMgr{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="mb-0"><i class="bi bi-megaphone me-2 text-primary"></i>Sponsor Manager</h2>
+  <a href="{{ url_for('analytics') }}" class="btn btn-outline-primary">
+    <i class="bi bi-graph-up me-1"></i> View ROI Dashboard
+  </a>
+</div>
+
+<div class="card shadow-sm mb-4">
+  <div class="card-header bg-primary text-white">
+    <h5 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Add Sponsor</h5>
+  </div>
+  <div class="card-body">
+    <form method="POST" action="{{ url_for('sponsors') }}" class="row g-2">
+      <div class="col-md-4">
+        <input type="text" class="form-control" name="name" placeholder="Sponsor name" required />
+      </div>
+      <div class="col-md-4">
+        <input type="text" class="form-control" name="booth_name" placeholder="Booth name or location" />
+      </div>
+      <div class="col-md-2 d-flex align-items-center">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="active" id="active" checked />
+          <label class="form-check-label" for="active">Active</label>
+        </div>
+      </div>
+      <div class="col-md-2 d-grid">
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-save me-1"></i>Create
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-header bg-light">
+    <h5 class="mb-0">Sponsor Campaigns</h5>
+  </div>
+  <div class="card-body p-0">
+    {% if sponsors %}
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Name</th>
+            <th>Booth</th>
+            <th>Status</th>
+            <th>Scan URL</th>
+            <th>Log Booth Engagement</th>
+            <th class="text-center">Delete</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for sponsor in sponsors %}
+          <tr>
+            <td>{{ sponsor.name }}</td>
+            <td>{{ sponsor.booth_name or '-' }}</td>
+            <td>
+              {% if sponsor.active %}
+              <span class="badge bg-success">Active</span>
+              {% else %}
+              <span class="badge bg-secondary">Inactive</span>
+              {% endif %}
+            </td>
+            <td>
+              <a href="{{ url_for('sponsor_scan', qr_token=sponsor.qr_token, _external=True) }}" target="_blank" rel="noopener">
+                {{ url_for('sponsor_scan', qr_token=sponsor.qr_token, _external=True) }}
+              </a>
+            </td>
+            <td>
+              <form method="POST" action="{{ url_for('sponsor_booth_engagement', sponsor_id=sponsor.id) }}" class="d-flex gap-2">
+                <input
+                  type="email"
+                  class="form-control form-control-sm"
+                  name="attendee_email"
+                  placeholder="Attendee email"
+                  required
+                />
+                <button type="submit" class="btn btn-sm btn-outline-primary">Log</button>
+              </form>
+            </td>
+            <td class="text-center">
+              <form method="POST" action="{{ url_for('sponsors_delete', sponsor_id=sponsor.id) }}" style="display:inline;">
+                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete sponsor {{ sponsor.name }}?')">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="text-muted p-3 mb-0">No sponsors yet. Add one to start tracking ROI.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

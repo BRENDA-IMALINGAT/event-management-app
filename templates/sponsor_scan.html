@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}Sponsor Engagement – EventMgr{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-7 col-lg-6">
+    <div class="card shadow-sm">
+      <div class="card-header bg-success text-white">
+        <h4 class="mb-0"><i class="bi bi-check-circle me-2"></i>Engagement Recorded</h4>
+      </div>
+      <div class="card-body">
+        <p class="mb-1"><strong>Sponsor:</strong> {{ sponsor.name }}</p>
+        <p class="mb-3"><strong>Booth:</strong> {{ sponsor.booth_name or 'N/A' }}</p>
+
+        {% if attendee %}
+        <div class="alert alert-info mb-3">
+          Linked to attendee: <strong>{{ attendee.name }}</strong> ({{ attendee.email }})
+        </div>
+        {% else %}
+        <div class="alert alert-secondary mb-3">
+          Engagement recorded anonymously. Add attendee email to link this scan.
+        </div>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('sponsor_scan', qr_token=sponsor.qr_token) }}" class="row g-2">
+          <div class="col-md-8">
+            <input
+              type="email"
+              class="form-control"
+              name="attendee_email"
+              placeholder="Attendee email (optional for attribution)"
+            />
+          </div>
+          <div class="col-md-4 d-grid">
+            <button type="submit" class="btn btn-outline-primary">
+              <i class="bi bi-person-check me-1"></i>Submit with Email
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

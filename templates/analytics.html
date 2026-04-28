@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block title %}Analytics – EventMgr{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="mb-0"><i class="bi bi-graph-up me-2 text-primary"></i>Analytics Dashboard</h2>
+  <a href="{{ url_for('sponsors') }}" class="btn btn-outline-primary">
+    <i class="bi bi-megaphone me-1"></i> Manage Sponsors
+  </a>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="card shadow-sm border-primary text-center">
+      <div class="card-body">
+        <div class="display-6 fw-bold text-primary">{{ total_attendees }}</div>
+        <div class="text-muted">Registrations</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card shadow-sm border-success text-center">
+      <div class="card-body">
+        <div class="display-6 fw-bold text-success">{{ total_sponsors }}</div>
+        <div class="text-muted">Active Sponsor Campaigns</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card shadow-sm border-info text-center">
+      <div class="card-body">
+        <div class="display-6 fw-bold text-info">{{ total_qr_scans }}</div>
+        <div class="text-muted">Sponsor QR Scans</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card shadow-sm border-warning text-center">
+      <div class="card-body">
+        <div class="display-6 fw-bold text-warning">{{ total_booth_visits }}</div>
+        <div class="text-muted">Booth Engagements</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <h5 class="card-title">Sponsor ROI Snapshot</h5>
+    <p class="mb-0 text-muted">
+      Unique attendees engaged with sponsors:
+      <strong>{{ total_unique_attendees }}</strong>
+    </p>
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-header bg-light">
+    <h5 class="mb-0">Sponsor Performance</h5>
+  </div>
+  <div class="card-body p-0">
+    {% if sponsor_metrics %}
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Sponsor</th>
+            <th class="text-center">QR Scans</th>
+            <th class="text-center">Booth Visits</th>
+            <th class="text-center">Total Engagements</th>
+            <th class="text-center">Unique Attendees</th>
+            <th>Campaign QR URL</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in sponsor_metrics %}
+          <tr>
+            <td>
+              <div class="fw-semibold">{{ row.sponsor.name }}</div>
+              <div class="small text-muted">{{ row.sponsor.booth_name or 'No booth specified' }}</div>
+            </td>
+            <td class="text-center">{{ row.qr_scans }}</td>
+            <td class="text-center">{{ row.booth_visits }}</td>
+            <td class="text-center">{{ row.total_engagements }}</td>
+            <td class="text-center">{{ row.unique_attendees }}</td>
+            <td><a href="{{ row.scan_url }}" target="_blank" rel="noopener">{{ row.scan_url }}</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="text-muted p-3 mb-0">No sponsor campaigns yet. Create one to begin ROI tracking.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
