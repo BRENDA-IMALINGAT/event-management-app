@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Check-in Result – EventMgr{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5">
+    <div class="card shadow-sm {% if checked_in %}border-success{% else %}border-danger{% endif %}">
+      <div class="card-header {% if checked_in %}bg-success{% else %}bg-danger{% endif %} text-white">
+        <h4 class="mb-0"><i class="bi bi-qr-code-scan me-2"></i>Check-in Result</h4>
+      </div>
+      <div class="card-body">
+        <p class="mb-1"><strong>Attendee:</strong> {{ attendee.name }}</p>
+        <p class="mb-1"><strong>Event:</strong> {{ attendee.event.name }}</p>
+        <p class="mb-3">
+          <strong>Status:</strong>
+          {% if checked_in %}
+          <span class="badge bg-success">Checked In</span>
+          {% else %}
+          <span class="badge bg-danger">Denied</span>
+          {% endif %}
+        </p>
+        {% if checked_in and attendee.checked_in_at %}
+        <p class="small text-muted mb-0">Checked in at {{ attendee.checked_in_at }}</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
